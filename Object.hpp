@@ -1,6 +1,7 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
