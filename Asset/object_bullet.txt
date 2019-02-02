@@ -1,0 +1,4 @@
+3
+000 024 0xffffff 036 024 0xffffff
+036 024 0xffffff 018 000 0xffffff
+018 000 0xffffff 000 024 0xffffff
