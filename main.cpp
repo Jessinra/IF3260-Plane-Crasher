@@ -43,12 +43,12 @@ class Runner : public Master
   public:
     Runner(int h = 700, int w = 1000) : Master(h, w)
     {
-        pesawat = Object(0, 0, "object_plane.txt");
-        meriam = Object(0, 0, "object_gun.txt");
-        peluru = Object(0, 0, "object_star.txt");
-        puing1 = Object(0, 0, "object_plane_part1.txt");
-        puing2 = Object(0, 0, "object_plane_part2.txt");
-        puing3 = Object(0, 0, "object_plane_part3.txt");
+        pesawat = Object(0, 0, "Asset/object_plane.txt");
+        meriam = Object(0, 0, "Asset/object_gun.txt");
+        peluru = Object(0, 0, "Asset/object_star.txt");
+        puing1 = Object(0, 0, "Asset/object_plane_part1.txt");
+        puing2 = Object(0, 0, "Asset/object_plane_part2.txt");
+        puing3 = Object(0, 0, "Asset/object_plane_part3.txt");
     }
 
     void start()
@@ -71,7 +71,6 @@ class Runner : public Master
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
         bullets.push_back(MoveableObject(0, -1, 2, peluru));
 
-        Object *solidObject;
         for (int i = 1;; i = (i + 1) % 1000)
         {
             // draw
@@ -80,21 +79,21 @@ class Runner : public Master
             for (MoveableObject &movableObject : planes)
             {
                 drawObject(movableObject);
-                drawSolidObject(&movableObject);
+                drawSolidObject(movableObject);
             }
             for (MoveableObject &movableObject : debris)
             {
                 drawObject(movableObject);
-                drawSolidObject(&movableObject);
+                drawSolidObject(movableObject);
             }
             for (MoveableObject &movableObject : bullets)
             {
                 drawObject(movableObject);
-                drawSolidObject(&movableObject);
+                drawSolidObject(movableObject);
             }
 
             drawObject(cannon);
-            drawSolidObject(&cannon);
+            drawSolidObject(cannon);
 
             // move and rotate :/
             if (deg != 0)
@@ -257,8 +256,7 @@ class Runner : public Master
     }
 };
 
-int main()
-{
+int main(){
     /* non-newline input */
     struct termios org_opts, new_opts;
     int res = 0;
@@ -268,6 +266,7 @@ int main()
     new_opts.c_lflag &=
         ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_opts);
+
 
     /* Multithreading part */
     pthread_t thread;
