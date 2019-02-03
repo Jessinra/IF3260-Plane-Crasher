@@ -9,7 +9,6 @@
 
 /* changable */
 #define maxHeight 1080
-#define maxWidth 1920
 #define maxVertices 10000
 
 // Start from lower left corner
