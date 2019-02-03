@@ -1,3 +1,5 @@
+#ifndef OBJECT_FILLER_HPP
+#define OBJECT_FILLER_HPP
 
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +11,6 @@
 
 /* changable */
 #define maxHeight 1080
-#define maxWidth 1920
 #define maxVertices 10000
 
 // Start from lower left corner
@@ -51,3 +52,5 @@ class ObjectFiller {
     // void printTuple(EdgeTableTuple *tup)
     // void printTable()
 };
+
+#endif

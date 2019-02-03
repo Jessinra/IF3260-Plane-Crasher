@@ -1,6 +1,7 @@
 #include "objectFiller.hpp"
 
 ObjectFiller::ObjectFiller() {
+    initEdgeTable();
 }
 
 void ObjectFiller::insertionSort(EdgeTableTuple *ett) {
@@ -123,6 +124,7 @@ void ObjectFiller::fillObject(Object *object) {
     Line *filledLine;
 
     // Initialize EdgeTable
+    initEdgeTable();
     insertLinesToEdgeTable(object);
 
     // Initialize drawing position
@@ -130,7 +132,7 @@ void ObjectFiller::fillObject(Object *object) {
     int positionX = object->getPos().getX();
 
     // Start from yMin 0 Repeat until last yMin:
-    for (int i = 0; i < maxHeight; i++)  //4. Increment y by 1 (next scan line)
+    for (int i = 0; i < object->getHeight(); i++)  //4. Increment y by 1 (next scan line)
     {
         // 1. Move from EdgeTuple bucket y to the
         // ActiveEdgeTuple those edges whose ymin = y (entering edges)
