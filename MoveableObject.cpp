@@ -91,11 +91,22 @@ void MoveableObject::selfRotation(float x, float y, float theta)
         alreadyloop = true;
     }
 
+    for (Line &line : lines)
+    {
+        line.setStartPixel(Pixel(line.getStartPixel().getX() - xMin, line.getStartPixel().getY() - yMin, line.getStartPixel().getColor()));
+        line.setEndPixel(Pixel(line.getEndPixel().getX() - xMin, line.getEndPixel().getY() - yMin, line.getEndPixel().getColor()));
+    }
+
+    xMax -= xMin;
+    yMax -= yMin;
+
     x += this->position.getX();
     y += this->position.getY();
 
-    width = xMax - xMin + 1;
-    height = yMax - yMin + 1;
+    this->position.setPos(this->position.getX() + xMin, this->position.getY() + yMin);
+
+    width = xMax + 1;
+    height = yMax + 1;
 }
 
 void MoveableObject::selfDilated(float x, float y, float k)
