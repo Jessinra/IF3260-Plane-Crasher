@@ -75,6 +75,11 @@ void Object::setPos(float x, float y)
     this->position = Pixel(x, y);
 }
 
+int Object::getSingleColor() const
+{
+    return this->getLines()[0].getStartPixel().getColor();
+}
+
 vector<Line> Object::getLines() const
 {
     return lines;

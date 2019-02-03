@@ -30,6 +30,7 @@ class Object
     void setPos(Pixel); // change setPos to void
     void setPos(float, float);
 
+    int getSingleColor() const;
     vector<Line> getLines() const;
     Pixel getPos() const;
     int getWidth() const;

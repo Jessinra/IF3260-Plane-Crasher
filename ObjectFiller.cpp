@@ -54,20 +54,6 @@ void ObjectFiller::insertLinesToEdgeTable(Object *object)
     }
 }
 
-void ObjectFiller::storeEdgeInTuple(EdgeTableTuple *receiver, int yMax, int xMin, float inverseGradient)
-{
-    // both used for edgetable and active edge table..
-    // The edge tuple sorted in increasing yMax and x of the lower end.
-    (receiver->buckets[(receiver)->countEdgeBucket]).yMax = yMax;
-    (receiver->buckets[(receiver)->countEdgeBucket]).xMin = (float)xMin;
-    (receiver->buckets[(receiver)->countEdgeBucket]).inverseGradient = inverseGradient;
-
-    // sort the buckets
-    insertionSort(receiver);
-
-    (receiver->countEdgeBucket)++;
-}
-
 void ObjectFiller::storeEdgeInTable(int x1, int y1, int x2, int y2)
 {
     float gradient, inverseGradient;
@@ -103,6 +89,20 @@ void ObjectFiller::storeEdgeInTable(int x1, int y1, int x2, int y2)
     }
 
     storeEdgeInTuple(&EdgeTable[yMin], yMax, xMin, inverseGradient);
+}
+
+void ObjectFiller::storeEdgeInTuple(EdgeTableTuple *receiver, int yMax, int xMin, float inverseGradient)
+{
+    // both used for edgetable and active edge table..
+    // The edge tuple sorted in increasing yMax and x of the lower end.
+    (receiver->buckets[(receiver)->countEdgeBucket]).yMax = yMax;
+    (receiver->buckets[(receiver)->countEdgeBucket]).xMin = (float)xMin;
+    (receiver->buckets[(receiver)->countEdgeBucket]).inverseGradient = inverseGradient;
+
+    // sort the buckets
+    insertionSort(receiver);
+
+    (receiver->countEdgeBucket)++;
 }
 
 void ObjectFiller::removeEdgeByYmax(EdgeTableTuple *Tuple, int currentY)
@@ -149,6 +149,9 @@ vector<Line> ObjectFiller::getObjectFillerLines(Object *object)
     // Initialize EdgeTable
     initEdgeTable();
     insertLinesToEdgeTable(object);
+
+    // Get object color
+    const int sampleColor = object->getSingleColor();
 
     // Initialize drawing position
     int positionY = object->getPos().getY();
@@ -249,10 +252,8 @@ vector<Line> ObjectFiller::getObjectFillerLines(Object *object)
                 if (FillFlag)
                 {
                     //  draw horizontal line of solid line
-                    // TODO: IMPLEMENT COLOR
-
-                    pixelStart = new Pixel(x1, i);
-                    pixelEnd = new Pixel(x2, i);
+                    pixelStart = new Pixel(x1, i, sampleColor);
+                    pixelEnd = new Pixel(x2, i, sampleColor);
                     filledLine = new Line(*pixelStart, *pixelEnd);
 
                     lineToDraw.push_back(*filledLine);
