@@ -5,12 +5,13 @@
 
 #include "Object.hpp"
 
-class MoveableObject : public Object {
-   protected:
+class MoveableObject : public Object
+{
+  protected:
     float speed;
     float dx, dy;
 
-   public:
+  public:
     MoveableObject(float, float, const std::string &);
     MoveableObject(float, float, float, float, float, const std::string &);
     MoveableObject(const Object &);
