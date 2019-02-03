@@ -76,13 +76,24 @@ class Runner : public Master
             // draw
             clearWindow();
 
-            for (const MoveableObject &obj : planes)
-                drawObject(obj);
-            for (const MoveableObject &obj : debris)
-                drawObject(obj);
-            for (const MoveableObject &obj : bullets)
-                drawObject(obj);
+            for (MoveableObject &movableObject : planes)
+            {
+                drawObject(movableObject);
+                drawSolidObject(&movableObject);
+            }
+            for (MoveableObject &movableObject : debris)
+            {
+                drawObject(movableObject);
+                drawSolidObject(&movableObject);
+            }
+            for (MoveableObject &movableObject : bullets)
+            {
+                drawObject(movableObject);
+                drawSolidObject(&movableObject);
+            }
+
             drawObject(cannon);
+            drawSolidObject(&cannon);
 
             // move and rotate :/
             if (deg != 0)
