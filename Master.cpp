@@ -158,12 +158,17 @@ void Master::draw(int xStart, int yStart, int **img, int height, int width)
     for (int y = max(0, -yStart); y < height; y++)
     {
         if (y + yStart >= this->yend)
+        {
             break;
+        }
 
         for (int x = max(0, -xStart); x < width; x++)
         {
             if (x + xStart >= this->xend)
+            {
                 break;
+            }
+
             assignColor(x + xStart, y + yStart, img[y][x]);
         }
     }
@@ -174,11 +179,17 @@ void Master::draw(int xStart, int yStart, const vector<vector<int>> &img)
     for (int y = max(0, -yStart); y < (int)img.size(); y++)
     {
         if (y + yStart >= this->yend)
+        {
             break;
+        }
+
         for (int x = max(0, -xStart); x < img[y].size(); x++)
         {
             if (x + xStart >= this->xend)
+            {
                 break;
+            }
+
             assignColor(x + xStart, y + yStart, img[y][x]);
         }
     }
