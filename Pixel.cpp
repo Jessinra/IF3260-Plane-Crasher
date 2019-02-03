@@ -77,7 +77,7 @@ Pixel Pixel::rotation(float pointX, float pointY, float theta)
     resultX = xnew + pointX;
     resultY = ynew + pointY;
 
-    return Pixel(resultX, resultY);
+    return Pixel(resultX, resultY, col);
 }
 
 Pixel Pixel::dilated(float pointX, float pointY, float k)
