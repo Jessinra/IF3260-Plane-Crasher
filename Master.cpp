@@ -128,6 +128,12 @@ void Master::copyColor(int xTarget, int yTarget, int xSource, int ySource)
         *((unsigned int *)(fbp + location1)) = *((unsigned int *)fbp + location2);
     }
 }
+    
+void Master::assignColorBuffer(vector<vector<unsigned int> > & buffer, int x, int y, unsigned int color){
+    if (y < buffer.size() && x < buffer[0].size()){
+        buffer[y][x] = color;
+    }
+}
 
 void Master::clearWindow() { memset(fbp, 0, (yend * ymultiplier + yadder)); }
 
@@ -174,7 +180,7 @@ void Master::draw(int xStart, int yStart, int **img, int height, int width)
     }
 }
 
-void Master::draw(int xStart, int yStart, const vector<vector<int>> &img)
+void Master::draw(int xStart, int yStart, const vector<vector<unsigned int>> &img)
 {
     for (int y = max(0, -yStart); y < (int)img.size(); y++)
     {
@@ -293,6 +299,97 @@ void Master::drawLine(int positionX, int positionY, const Line &line)
     }
 }
 
+
+void Master::drawLine(vector<vector<unsigned int>> &buffer, const Line & line){
+    // Bresenham's line algorithm with gradient coloring
+
+    // Position section
+    int xStart = line.getStartPixel().getX();
+    int yStart = line.getStartPixel().getY();
+    int xEnd = line.getEndPixel().getX();
+    int yEnd = line.getEndPixel().getY();
+
+    // Color section
+    int colorStart = line.getStartPixel().getColor();
+    int colorEnd = line.getEndPixel().getColor();
+
+    // Setup Const
+    const float deltaX = xEnd - xStart;
+    const float deltaY = yEnd - yStart;
+
+    const float deltaRed = ((colorEnd & 0xff0000) - (colorStart & 0xff0000)) >> 16;
+    const float deltaGreen = ((colorEnd & 0xff00) - (colorStart & 0xff00)) >> 8;
+    const float deltaBlue = ((colorEnd & 0xff) - (colorStart & 0xff));
+
+    const float manhattanDist = fabs(deltaX) + fabs(deltaY) + 1;
+
+    const float redStep = deltaRed / manhattanDist;
+    const float greenStep = deltaGreen / manhattanDist;
+    const float blueStep = deltaBlue / manhattanDist;
+
+    const int xStep = deltaX >= 0 ? 1 : -1;
+    const int yStep = deltaY >= 0 ? 1 : -1;
+
+    float red = (colorStart & 0xff0000) >> 16;
+    float green = (colorStart & 0xff00) >> 8;
+    float blue = colorStart & 0xff;
+
+    if (xStart == xEnd){
+        if (xStart >= 0 && xStart < buffer.size()){
+            for (int y = yStart; y != yEnd + yStep; y += yStep){
+                unsigned int color = ((unsigned int)floor(red) << 16) + ((unsigned int)floor(green) << 8) + ((unsigned int)floor(blue));
+                assignColorBuffer(buffer, xStart, y, color);
+
+                red += redStep;
+                green += greenStep;
+                blue += blueStep;
+            }
+        }
+        return;
+    }
+
+    if(deltaY <= deltaX){
+        int y = yStart;
+        const float deltaErr = fabs(deltaY / deltaX);
+        float error = 0;
+        for (int x = xStart; x != xEnd + xStep;x += xStep)
+        {
+            unsigned int color = ((unsigned int)floor(red) << 16) + ((unsigned int)floor(green) << 8) + ((unsigned int)floor(blue));
+            assignColorBuffer(buffer, x, y, color);
+
+            error += deltaErr;
+            if (error >= 0.5){
+                y += yStep;
+                error -= 1;
+            }
+
+            red += redStep;
+            green += greenStep;
+            blue += blueStep;
+        }
+    }
+    else{
+        int x = xStart;
+        const float deltaErr = fabs(deltaX / deltaY);
+        float error = 0;
+        for (int y = yStart; y != yEnd + yStep;y += yStep)
+        {
+            unsigned int color = ((unsigned int)floor(red) << 16) + ((unsigned int)floor(green) << 8) + ((unsigned int)floor(blue));
+            assignColorBuffer(buffer, x, y, color);
+
+            error += deltaErr;
+            if (error >= 0.5){
+                x += xStep;
+                error -= 1;
+            }
+
+            red += redStep;
+            green += greenStep;
+            blue += blueStep;
+        }
+    }
+}
+
 void Master::drawObject(const Object &object)
 {
     int positionX = object.getRefPos().getX();
@@ -303,10 +400,10 @@ void Master::drawObject(const Object &object)
     }
 }
 
-void Master::drawSolidObject(Object *object)
+void Master::drawSolidObject(const Object &object)
 {
-    int positionX = object->getRefPos().getX();
-    int positionY = object->getRefPos().getY();
+    int positionX = object.getRefPos().getX();
+    int positionY = object.getRefPos().getY();
 
     vector<Line> objectFillerLines = this->objectFiller.getObjectFillerLines(object);
 
@@ -314,4 +411,51 @@ void Master::drawSolidObject(Object *object)
     {
         drawLine(positionX, positionY, line);
     }
+}
+
+void Master::drawSolidObject2(const Object &obj){
+    int h = obj.getHeight();
+    int w = obj.getWidth();
+    const unsigned int back = 0;
+    unsigned int color = back;
+    vector<vector<unsigned int> > vir(h, vector<unsigned int>(w, back));
+    // draw line
+    for(const Line &line : obj.getRefLines()){
+        drawLine(vir, line);
+    }
+
+    // filling top to down
+    for(int i=1;i<h-1;++i){
+        color = back;
+        for(int j=0;j<w;++j){
+            if(vir[i][j] != back){
+                /* Anomaly check start */
+                // top check;
+                bool top = false;
+                for(int k=-1;k<=1;++k){
+                    if(j+k >= 0 && j+k < w && vir[i-1][j+k] != back){
+                        top = true;
+                        break;
+                    }
+                }
+                // botom check
+                bool bot = false;
+                for(int k=-1;k<=1;++k){
+                    if(j+k >= 0 && j+k < w && vir[i+1][j+k] != back){
+                        bot = true;
+                        break;
+                    }
+                }
+                /* Anomaly check end */
+                if(top && bot){
+                    color = color == back? vir[i][j] : back;
+                }
+            }
+            else{
+                vir[i][j] = color;
+            }
+        }
+    }
+
+    draw(obj.getRefPos().getX(), obj.getRefPos().getY(), vir);
 }

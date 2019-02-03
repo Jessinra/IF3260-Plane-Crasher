@@ -61,19 +61,22 @@ class Master
 
     bool isInsideWindow(int, int);
     void assignColor(int, int, unsigned int);
+    static void assignColorBuffer(vector<vector<unsigned int> > &, int, int, unsigned int);
     void copyColor(int, int, int, int);
     void clearWindow();
     void clearWindow(unsigned int);
     void moveWindowUp();
 
     void draw(int, int, int **, int, int);
-    void draw(int, int, const vector<vector<int>> &);
+    void draw(int, int, const vector<vector<unsigned int>> &);
 
     void drawPixel(int, int, const Pixel &);
     void drawPixels(int xStart, int yStart, vector<Pixel> pixels);
     void drawLine(int, int, const Line &);
+    static void drawLine(vector<vector<unsigned int>> &, const Line &);
     void drawObject(const Object &);
-    void drawSolidObject(Object *);
+    void drawSolidObject(const Object &);
+    void drawSolidObject2(const Object &);
 };
 
 #endif
