@@ -65,6 +65,13 @@ bool Object::outOfWindow(int h, int w) const
     return (this->position.getX() >= w || this->position.getY() >= h || this->position.getX() <= -width || this->position.getY() <= -height);
 }
 
+void Object::reverseHorizontal(){
+    for(Line &line : lines){
+        line.setStartPixel(Pixel(width - line.getStartPixel().getX() - 1, line.getStartPixel().getY(), line.getStartPixel().getColor()));
+        line.setEndPixel(Pixel(width - line.getEndPixel().getX() - 1, line.getEndPixel().getY(), line.getEndPixel().getColor()));
+    }
+}
+
 void Object::setPos(Pixel position)
 {
     this->position = position;

@@ -16,21 +16,17 @@ int deg = 0;
 int shoot = 0;
 bool keepreading;
 
-void *readinput(void *threadid)
-{
+void *readinput(void *threadid){
     char c;
-    while (keepreading)
-    {
+    while (keepreading){
         c = getchar();
         if(c == '\n'){
             shoot++;
         }
-        else if (c == 'd' && deg <= 100)
-        {
+        else if (c == 'd' && deg <= 100){
             deg += 10;
         }
-        else if (c == 'a' && deg >= -100)
-        {
+        else if (c == 'a' && deg >= -100){
             deg -= 10;
         }
         usleep(10000);
@@ -43,20 +39,27 @@ class Runner : public Master
 {
   protected:
     Object pesawat, meriam, peluru, puing1, puing2, puing3;
+    Object revpesawat, revpuing1, revpuing2, revpuing3;
 
   public:
-    Runner(int h = 700, int w = 1000) : Master(h, w)
-    {
+    Runner(int h = 700, int w = 1000) : Master(h, w){
+        revpesawat = Object(0, 0, "Asset/object_plane.txt");
+        revpesawat.reverseHorizontal();
         pesawat = Object(0, 0, "Asset/object_plane.txt");
         meriam = Object(0, 0, "Asset/object_gun.txt");
         peluru = Object(0, 0, "Asset/object_star.txt");
         puing1 = Object(0, 0, "Asset/object_plane_part1.txt");
         puing2 = Object(0, 0, "Asset/object_plane_part2.txt");
         puing3 = Object(0, 0, "Asset/object_plane_part3.txt");
+        revpuing1 = Object(0, 0, "Asset/object_plane_part1.txt");
+        revpuing1.reverseHorizontal();
+        revpuing2 = Object(0, 0, "Asset/object_plane_part2.txt");
+        revpuing2.reverseHorizontal();
+        revpuing3 = Object(0, 0, "Asset/object_plane_part3.txt");
+        revpuing3.reverseHorizontal();
     }
 
-    void start()
-    {
+    void start(){
         int sudut_meriam = 0;
         float titik_acuan_x, titik_acuan_y;
         titik_acuan_x = xend / 2.0;
@@ -68,30 +71,29 @@ class Runner : public Master
         peluru.setPos(
             Pixel((xend - peluru.getWidth()) / 2.0,
                   yend - meriam.getHeight() - peluru.getHeight() - 2));
-        vector<MoveableObject> planes;
+        vector<MoveableObject> planes, rplanes;
         vector<MoveableObject> debris;
         vector<MoveableObject> bullets;
         MoveableObject cannon = meriam;
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
-        bullets.push_back(MoveableObject(0, -1, 2, peluru));
 
-        for (int i = 1;; i = (i + 1) % 500)
-        {
+        for (int i = 1;; i = (i + 1) % 500){
             // draw
             clearWindow();
 
-            for (MoveableObject &movableObject : planes)
-            {
+            for (MoveableObject &movableObject : planes){
                 drawObject(movableObject);
                 drawSolidObject(movableObject);
             }
-            for (MoveableObject &movableObject : debris)
-            {
+            for (MoveableObject &movableObject : rplanes){
                 drawObject(movableObject);
                 drawSolidObject(movableObject);
             }
-            for (MoveableObject &movableObject : bullets)
-            {
+            for (MoveableObject &movableObject : debris){
+                drawObject(movableObject);
+                drawSolidObject(movableObject);
+            }
+            for (MoveableObject &movableObject : bullets){
                 drawObject(movableObject);
                 drawSolidObject(movableObject);
             }
@@ -100,76 +102,68 @@ class Runner : public Master
             drawSolidObject(cannon);
 
             // move and rotate :/
-            if (deg != 0)
-            {
-                if (deg > 0)
-                {
-                    if (sudut_meriam <= 40)
-                    {
+            if (deg != 0){
+                if (deg > 0){
+                    if (sudut_meriam <= 40){
                         sudut_meriam += 10;
                         cannon = MoveableObject(meriam);
                         cannon.selfRotation(titik_acuan_x, titik_acuan_y,
                                             sudut_meriam);
                         deg -= 10;
                     }
-                    else
-                    {
+                    else{
                         deg = 0;
                     }
                 }
-                else
-                {
-                    if (sudut_meriam >= -40)
-                    {
+                else{
+                    if (sudut_meriam >= -40){
                         sudut_meriam -= 10;
                         cannon = MoveableObject(meriam);
                         cannon.selfRotation(titik_acuan_x, titik_acuan_y,
                                             sudut_meriam);
                         deg += 10;
                     }
-                    else
-                    {
+                    else{
                         deg = 0;
                     }
                 }
             }
+            vector<char> checkr(rplanes.size(), 1);
             vector<char> checkp(planes.size(), 1);
             vector<char> checkd(debris.size(), 1);
+            vector<MoveableObject> tmpr; // rplane
             vector<MoveableObject> tmpp; // plane
             vector<MoveableObject> tmpb; // bullet
             vector<MoveableObject> tmpd; // debris
-            for (int j = 0; j < planes.size(); ++j)
-            {
+            for (int j = 0; j < planes.size(); ++j){
                 planes[j].move();
-                if (planes[j].outOfWindow(yend, xend))
-                {
-                    checkp[j] = 0;
-                }
+                // if (planes[j].outOfWindow(yend, xend)){
+                //     checkp[j] = 0;
+                // }
             }
-            for (int j = 0; j < debris.size(); ++j)
-            {
+            for (int j = 0; j < rplanes.size(); ++j){
+                rplanes[j].move();
+                // if (rplanes[j].outOfWindow(yend, xend)){
+                //     checkr[j] = 0;
+                // }
+            }
+            for (int j = 0; j < debris.size(); ++j){
                 debris[j].move();
-                if (debris[j].outOfWindow(yend, xend))
-                {
+                if (debris[j].outOfWindow(yend, xend)){
                     checkd[j] = 0;
                 }
             }
-            for (int j = 0; j < bullets.size(); ++j)
-            {
+            for (int j = 0; j < bullets.size(); ++j){
                 bullets[j].move();
             }
 
             // very slow shit
-            for (const MoveableObject &objb : bullets)
-            {
+            for (const MoveableObject &objb : bullets){
                 bool bisa = true;
-                for (int j = 0; j < planes.size(); ++j)
-                {
-                    if (overlap(planes[j], objb))
-                    {
+                for (int j = 0; j < planes.size(); ++j){
+                    if (overlap(planes[j], objb)){
                         // isi pecahan
-                        if (checkp[j])
-                        {
+                        // if (checkp[j]){
                             MoveableObject sp = puing1;
                             sp.setPos(planes[j].getRefPos());
                             sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
@@ -191,40 +185,85 @@ class Runner : public Master
                                          cos(30 * PI / 180));
                             tmpd.push_back(sp);
                             checkp[j] = 0;
-                        }
+                        // }
                         bisa = false;
                     }
                 }
-                for (int j = 0; j < debris.size(); ++j)
-                {
+                for (int j = 0; j < rplanes.size(); ++j){
+                    if (overlap(rplanes[j], objb)){
+                        // isi pecahan
+                        // if (checkp[j]){
+                            MoveableObject sp = revpuing1;
+                            sp.setPos(Pixel(rplanes[j].getRefPos().getX() + 150,
+                                            rplanes[j].getRefPos().getY()));
+                            sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
+                                             sin(60 * PI / 180),
+                                         cos(60 * PI / 180));
+                            tmpd.push_back(sp);
+                            sp = revpuing2;
+                            sp.setPos(Pixel(rplanes[j].getRefPos().getX() + 100,
+                                            rplanes[j].getRefPos().getY() + 50));
+                            sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
+                                             sin(45 * PI / 180),
+                                         cos(45 * PI / 180));
+                            tmpd.push_back(sp);
+                            sp = revpuing3;
+                            sp.setPos(Pixel(rplanes[j].getRefPos().getX(),
+                                            rplanes[j].getRefPos().getY()));
+                            sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
+                                             sin(30 * PI / 180),
+                                         cos(30 * PI / 180));
+                            tmpd.push_back(sp);
+                            checkr[j] = 0;
+                        // }
+                        bisa = false;
+                    }
+                }
+                for (int j = 0; j < debris.size(); ++j){
                     debris[j].move();
-                    if (overlap(debris[j], objb))
-                    {
+                    if (overlap(debris[j], objb)){
                         checkd[j] = 0;
                         bisa = false;
                     }
                 }
-                if (bisa && !objb.outOfWindow(yend, xend))
-                {
+                if (bisa && !objb.outOfWindow(yend, xend)){
                     tmpb.push_back(objb);
                 }
             }
-            for (int j = 0; j < planes.size(); ++j)
-            {
-                if (checkp[j])
-                    tmpp.push_back(planes[j]);
+            for (int j = 0; j < planes.size(); ++j){
+                if (checkp[j]){
+                    Pixel p = planes[j].getPos();
+                    if((int)p.getX() <= 0 && (int)p.getY() == 0){
+                        tmpr.push_back(MoveableObject(1, 0, 1, revpesawat));
+                    }
+                    else{
+                        tmpp.push_back(planes[j]);
+                    }
+                }
             }
-            for (int j = 0; j < debris.size(); ++j)
-            {
+            for (int j = 0; j < rplanes.size(); ++j){
+                if (checkr[j]){
+                    Pixel p = rplanes[j].getPos();
+                    if((int)p.getX() >= xend - rplanes[j].getWidth() && (int)p.getY() == 0){
+                        MoveableObject tmp = MoveableObject(-11, 0, 1, pesawat);
+                        tmp.setPos(Pixel(xend - rplanes[j].getWidth(), 0));
+                        tmpp.push_back(tmp);
+                    }
+                    else{
+                        tmpr.push_back(rplanes[j]);
+                    }
+                }
+            }
+            for (int j = 0; j < debris.size(); ++j){
                 if (checkd[j])
                     tmpd.push_back(debris[j]);
             }
+            rplanes = tmpr;
             planes = tmpp;
             bullets = tmpb;
             debris = tmpd;
 
-            if (shoot > 0)
-            {
+            if (shoot > 0){
                 MoveableObject tmp = MoveableObject(peluru);
                 tmp.setSpeed(2);
                 tmp.selfRotation(titik_acuan_x, titik_acuan_y, sudut_meriam);
@@ -233,13 +272,17 @@ class Runner : public Master
                 bullets.push_back(tmp);
                 shoot --;
             }
-            if (i == 0)
-            {
+            if (i == 0){
                 planes.push_back(MoveableObject(-1, 0, 1, pesawat));
+            }
+
+            if(planes.size() + rplanes.size() >= 8){ // stop game
+                break;
             }
 
             usleep(5000);
         }
+        puts("GAME OVER!! YOU LOSE");
     }
 
     bool overlap(const Object &p, const Object &q)
@@ -281,8 +324,9 @@ int main(){
 
     Runner run;
     run.start();
+    keepreading = false;
 
-    /* close hehe */
+    /* close */
     pthread_exit(NULL);
     res = tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);
     assert(res == 0);

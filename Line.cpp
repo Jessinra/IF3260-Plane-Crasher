@@ -25,3 +25,11 @@ Pixel Line::getEndPixel() const
 {
     return this->endPixel;
 }
+
+const Pixel & Line::getRefStartPixel() const{
+    return startPixel;
+}
+
+const Pixel & Line::getRefEndPixel() const{
+    return endPixel;
+}

@@ -26,6 +26,7 @@ class Object
     Object(float, float, std::string);
 
     bool outOfWindow(int, int) const;
+    void reverseHorizontal();
 
     void setPos(Pixel); // change setPos to void
     void setPos(float, float);
