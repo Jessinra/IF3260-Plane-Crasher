@@ -71,6 +71,7 @@ class Runner : public Master
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
         bullets.push_back(MoveableObject(0, -1, 2, peluru));
 
+        Object *solidObject;
         for (int i = 1;; i = (i + 1) % 1000)
         {
             // draw
