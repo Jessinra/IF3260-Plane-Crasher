@@ -9,20 +9,22 @@
 #include "Pixel.hpp"
 using namespace std;
 
-class Line {
-   protected:
+class Line
+{
+
+  protected:
     Pixel startPixel;
     Pixel endPixel;
 
-   public:
+  public:
     Line(Pixel, Pixel);
 
     void setStartPixel(Pixel);
     void setEndPixel(Pixel);
     Pixel getStartPixel() const;
     Pixel getEndPixel() const;
-    Pixel& getRefStartPixel() const;
-    Pixel& getRefEndPixel() const;
+    Pixel &getRefStartPixel() const;
+    Pixel &getRefEndPixel() const;
 };
 
 #endif

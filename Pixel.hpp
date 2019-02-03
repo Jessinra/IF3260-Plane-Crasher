@@ -5,13 +5,14 @@
 #define PI 3.14159265
 using namespace std;
 
-class Pixel {
-   private:
+class Pixel
+{
+  private:
     float x;
     float y;
     unsigned int col;
 
-   public:
+  public:
     Pixel();
     Pixel(float, float);
     Pixel(float, float, unsigned int);

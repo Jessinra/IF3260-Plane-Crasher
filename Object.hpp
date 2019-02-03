@@ -11,30 +11,31 @@
 #include "Line.hpp"
 #include "Pixel.hpp"
 
-class Object {
+class Object
+{
     // Suatu object tersusun atas garix matrix of pixel
 
-   protected:
+  protected:
     Pixel position;
     vector<Line> lines;
     int width;
     int height;
 
-   public:
+  public:
     Object();
     Object(float, float, std::string);
 
     bool outOfWindow(int, int) const;
 
-    void setPos(Pixel);  // change setPos to void
+    void setPos(Pixel); // change setPos to void
     void setPos(float, float);
 
     vector<Line> getLines() const;
     Pixel getPos() const;
     int getWidth() const;
     int getHeight() const;
-    const vector<Line>& getRefLines() const;
-    const Pixel& getRefPos() const;
+    const vector<Line> &getRefLines() const;
+    const Pixel &getRefPos() const;
 };
 
 #endif
