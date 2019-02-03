@@ -68,6 +68,7 @@ class Master {
     void drawPixels(int xStart, int yStart, Pixel *pixels);
     void drawLine(int, int, const Line &);
     void drawObject(const Object &);
+
 };
 
 #endif
