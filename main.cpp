@@ -71,18 +71,33 @@ class Runner : public Master
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
         bullets.push_back(MoveableObject(0, -1, 2, peluru));
 
+        Object *solidObject;
         for (int i = 1;; i = (i + 1) % 1000)
         {
             // draw
             clearWindow();
 
-            for (const MoveableObject &obj : planes)
-                drawObject(obj);
-            for (const MoveableObject &obj : debris)
-                drawObject(obj);
-            for (const MoveableObject &obj : bullets)
-                drawObject(obj);
+            for (MoveableObject &movableObject : planes)
+            {
+                drawObject(movableObject);
+                solidObject = &movableObject;
+                drawSolidObject(solidObject);
+            }
+            for (MoveableObject &movableObject : debris)
+            {
+                drawObject(movableObject);
+                solidObject = &movableObject;
+                drawSolidObject(solidObject);
+            }
+            for (MoveableObject &movableObject : bullets)
+            {
+                drawObject(movableObject);
+                solidObject = &movableObject;
+                drawSolidObject(solidObject);
+            }
+
             drawObject(cannon);
+            drawSolidObject(&cannon);
 
             // move and rotate :/
             if (deg != 0)
