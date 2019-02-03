@@ -1,8 +1,9 @@
 #ifndef OBJECT_FILLER_HPP
 #define OBJECT_FILLER_HPP
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+#include <vector>
 
 #include "Line.hpp"
 #include "Object.hpp"
@@ -19,6 +20,8 @@ public:
   int yMax;   // max y-coordinate of edge
   float xMin; // x-coordinate of lowest edge point updated only in aet
   float inverseGradient;
+  EdgeBucket();
+  EdgeBucket(int, float, float);
 };
 
 class EdgeTableTuple
@@ -27,29 +30,30 @@ class EdgeTableTuple
   // The edge table (ET) with edges entries sorted
   // in increasing y and x of the lower end
 public:
-  int countEdgeBucket;             // no. of edgebuckets
-  EdgeBucket buckets[maxVertices]; // max vertices (??)
+  // int countEdgeBucket;             // no. of edgebuckets
+  vector<EdgeBucket> buckets; // max vertices (??)
+  EdgeTableTuple();
 };
 
 class ObjectFiller
 {
 private:
-  EdgeTableTuple EdgeTable[maxHeight];
+  vector<EdgeTableTuple> EdgeTable;
   EdgeTableTuple ActiveEdgeTuple;
 
   /* Function to sort an array using insertion sort*/
-  void insertionSort(EdgeTableTuple *ett);
+  void insertionSort(EdgeTableTuple &ett);
 
   void initEdgeTable();
-  void insertLinesToEdgeTable(Object *object);
+  void insertLinesToEdgeTable(const Object &object);
   void storeEdgeInTable(int x1, int y1, int x2, int y2);
-  void storeEdgeInTuple(EdgeTableTuple *receiver, int yMax, int xMin, float inverseGradient);
-  void removeEdgeByYmax(EdgeTableTuple *Tuple, int currentY);
-  void updateXMin(EdgeTableTuple *Tuple);
+  void storeEdgeInTuple(EdgeTableTuple &receiver, int yMax, int xMin, float inverseGradient);
+  void removeEdgeByYmax(EdgeTableTuple &Tuple, int currentY);
+  void updateXMin(EdgeTableTuple &Tuple);
 
 public:
   ObjectFiller();
-  vector<Line> getObjectFillerLines(Object *);
+  vector<Line> getObjectFillerLines(const Object &);
 };
 
 #endif

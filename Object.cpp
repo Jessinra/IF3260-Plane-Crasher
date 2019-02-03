@@ -55,8 +55,8 @@ Object::Object(float x, float y, std::string filename)
         lines.push_back(line);
     }
 
-    height = yMax - yMin + 1;
-    width = xMax - xMin + 1;
+    height = yMax + 1;
+    width = xMax + 1;
     inFile.close();
 }
 
