@@ -112,7 +112,8 @@ void ObjectFiller::removeEdgeByYmax(EdgeTableTuple &Tuple, int currentY){
     for (int i = 0; i < Tuple.buckets.size(); i++){
         if (Tuple.buckets[i].yMax == currentY){
             vector<EdgeBucket> &tmp = Tuple.buckets;
-            tmp.erase(tmp.begin() + i, tmp.end());
+            tmp.erase(tmp.begin() + i);
+            i--;
         }
     }
 }

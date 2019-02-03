@@ -13,6 +13,7 @@ using namespace std;
 
 /* Aku sedih */
 int deg = 0;
+int shoot = 0;
 bool keepreading;
 
 void *readinput(void *threadid)
@@ -21,7 +22,10 @@ void *readinput(void *threadid)
     while (keepreading)
     {
         c = getchar();
-        if (c == 'd' && deg <= 100)
+        if(c == '\n'){
+            shoot++;
+        }
+        else if (c == 'd' && deg <= 100)
         {
             deg += 10;
         }
@@ -71,7 +75,7 @@ class Runner : public Master
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
         bullets.push_back(MoveableObject(0, -1, 2, peluru));
 
-        for (int i = 1;; i = (i + 1) % 1000)
+        for (int i = 1;; i = (i + 1) % 500)
         {
             // draw
             clearWindow();
@@ -219,7 +223,7 @@ class Runner : public Master
             bullets = tmpb;
             debris = tmpd;
 
-            if (i % 200 == 0)
+            if (shoot > 0)
             {
                 MoveableObject tmp = MoveableObject(peluru);
                 tmp.setSpeed(2);
@@ -227,13 +231,14 @@ class Runner : public Master
                 tmp.setVector(sin(sudut_meriam * PI / 180),
                               -cos(sudut_meriam * PI / 180));
                 bullets.push_back(tmp);
+                shoot --;
             }
-            if (i % 500 == 0)
+            if (i == 0)
             {
                 planes.push_back(MoveableObject(-1, 0, 1, pesawat));
             }
 
-            usleep(6000);
+            usleep(5000);
         }
     }
 
