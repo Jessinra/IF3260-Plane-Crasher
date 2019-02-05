@@ -399,7 +399,6 @@ int main(){
     run.start();
     keepreading = false;
 
-    puts("why not close");
     /* close */
     pthread_exit(NULL);
     res = tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);
