@@ -39,7 +39,7 @@ class Runner : public Master
 {
   protected:
     Object pesawat, meriam, peluru, puing1, puing2, puing3;
-    Object revpesawat, revpuing1, revpuing2, revpuing3;
+    Object revpesawat, revpuing1, revpuing2, revpuing3, explosion;
 
   public:
     Runner(int h = 700, int w = 1000) : Master(h, w){
@@ -57,6 +57,7 @@ class Runner : public Master
         revpuing2.reverseHorizontal();
         revpuing3 = Object(0, 0, "Asset/object_plane_part3.txt");
         revpuing3.reverseHorizontal();
+        explosion = Object(0, 0, "Asset/object_ledakan.txt");
     }
 
     void start(){
@@ -74,6 +75,7 @@ class Runner : public Master
         vector<MoveableObject> planes, rplanes;
         vector<MoveableObject> debris;
         vector<MoveableObject> bullets;
+        vector<MoveableObject> explosions;
         MoveableObject cannon = meriam;
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
 
@@ -96,6 +98,10 @@ class Runner : public Master
             for (MoveableObject &movableObject : bullets){
                 drawObject(movableObject);
                 drawSolidObject(movableObject);
+            }
+            for (MoveableObject &explosion : explosions) {
+                drawObject(explosion);
+                drawSolidObject(explosion);
             }
 
             drawObject(cannon);
@@ -131,10 +137,12 @@ class Runner : public Master
             vector<char> checkr(rplanes.size(), 1);
             vector<char> checkp(planes.size(), 1);
             vector<char> checkd(debris.size(), 1);
+            vector<char> checke(explosions.size(), 1);
             vector<MoveableObject> tmpr; // rplane
             vector<MoveableObject> tmpp; // plane
             vector<MoveableObject> tmpb; // bullet
             vector<MoveableObject> tmpd; // debris
+            vector<MoveableObject> tmpe; // explosion
             for (int j = 0; j < planes.size(); ++j){
                 planes[j].move();
                 // if (planes[j].outOfWindow(yend, xend)){
@@ -153,6 +161,11 @@ class Runner : public Master
                     checkd[j] = 0;
                 }
             }
+            for(int j = 0; j < explosions.size(); ++j) {
+                if (explosions[j].outOfWindow(yend, xend)) {
+                    checke[j] = 0;
+                }
+            }
             for (int j = 0; j < bullets.size(); ++j){
                 bullets[j].move();
             }
@@ -162,30 +175,36 @@ class Runner : public Master
                 bool bisa = true;
                 for (int j = 0; j < planes.size(); ++j){
                     if (overlap(planes[j], objb)){
-                        // isi pecahan
-                        // if (checkp[j]){
-                            MoveableObject sp = puing1;
-                            sp.setPos(planes[j].getRefPos());
-                            sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
-                                             sin(60 * PI / 180),
-                                         cos(60 * PI / 180));
-                            tmpd.push_back(sp);
-                            sp = puing2;
-                            sp.setPos(Pixel(planes[j].getRefPos().getX() + 100,
-                                            planes[j].getRefPos().getY() + 50));
-                            sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
-                                             sin(45 * PI / 180),
-                                         cos(45 * PI / 180));
-                            tmpd.push_back(sp);
-                            sp = puing3;
-                            sp.setPos(Pixel(planes[j].getRefPos().getX() + 300,
-                                            planes[j].getRefPos().getY()));
-                            sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
-                                             sin(30 * PI / 180),
-                                         cos(30 * PI / 180));
-                            tmpd.push_back(sp);
-                            checkp[j] = 0;
-                        // }
+                        // // isi pecahan
+                        // // if (checkp[j]){
+                        //     MoveableObject sp = puing1;
+                        //     sp.setPos(planes[j].getRefPos());
+                        //     sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
+                        //                      sin(60 * PI / 180),
+                        //                  cos(60 * PI / 180));
+                        //     tmpd.push_back(sp);
+                        //     sp = puing2;
+                        //     sp.setPos(Pixel(planes[j].getRefPos().getX() + 100,
+                        //                     planes[j].getRefPos().getY() + 50));
+                        //     sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
+                        //                      sin(45 * PI / 180),
+                        //                  cos(45 * PI / 180));
+                        //     tmpd.push_back(sp);
+                        //     sp = puing3;
+                        //     sp.setPos(Pixel(planes[j].getRefPos().getX() + 300,
+                        //                     planes[j].getRefPos().getY()));
+                        //     sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
+                        //                      sin(30 * PI / 180),
+                        //                  cos(30 * PI / 180));
+                        //     tmpd.push_back(sp);
+                        //     checkp[j] = 0;
+                        // // }
+                        // bisa = false;
+                        MoveableObject epl = explosion;
+                        epl.setPos(planes[j].getRefPos().getX() + planes[j].getWidth()/2,
+                            planes[j].getRefPos().getY() + planes[j].getHeight()/2);
+                        tmpe.push_back(epl);
+                        checkp[j] = 0;
                         bisa = false;
                     }
                 }
@@ -258,10 +277,15 @@ class Runner : public Master
                 if (checkd[j])
                     tmpd.push_back(debris[j]);
             }
+            for (int j = 0; j < explosions.size(); ++j) {
+                if (checke[j])
+                    tmpe.push_back(explosions[j]);
+            }
             rplanes = tmpr;
             planes = tmpp;
             bullets = tmpb;
             debris = tmpd;
+            explosions = tmpe;
 
             if (shoot > 0){
                 MoveableObject tmp = MoveableObject(peluru);
