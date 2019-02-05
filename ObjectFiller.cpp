@@ -96,6 +96,7 @@ void ObjectFiller::storeEdgeInTable(int x1, int y1, int x2, int y2)
         xMin = x1;
     }
 
+    if(yMin < 0) std::cerr<<"anjing eh "<<yMin<<std::endl;
     storeEdgeInTuple(EdgeTable[yMin], yMax, xMin, inverseGradient);
 }
 

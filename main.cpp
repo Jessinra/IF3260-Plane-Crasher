@@ -11,6 +11,12 @@
 
 using namespace std;
 
+#define explosiontime 10
+#define selectedtime 300
+#define degreechange 5
+#define maxdegree 50
+#define mindegree -50
+
 /* Aku sedih */
 int deg = 0;
 int shoot = 0;
@@ -24,10 +30,10 @@ void *readinput(void *threadid){
             shoot++;
         }
         else if (c == 'd' && deg <= 100){
-            deg += 10;
+            deg += degreechange;
         }
         else if (c == 'a' && deg >= -100){
-            deg -= 10;
+            deg -= degreechange;
         }
         usleep(10000);
     }
@@ -40,6 +46,7 @@ class Runner : public Master
   protected:
     Object pesawat, meriam, peluru, puing1, puing2, puing3;
     Object revpesawat, revpuing1, revpuing2, revpuing3;
+    Object ledakan, misil;
 
   public:
     Runner(int h = 700, int w = 1000) : Master(h, w){
@@ -57,9 +64,12 @@ class Runner : public Master
         revpuing2.reverseHorizontal();
         revpuing3 = Object(0, 0, "Asset/object_plane_part3.txt");
         revpuing3.reverseHorizontal();
+        ledakan = Object(0, 0, "Asset/object_ledakan.txt");
+        misil = Object(0, 0, "Asset/object_misil.txt");
     }
 
     void start(){
+        int live = 8;
         int sudut_meriam = 0;
         float titik_acuan_x, titik_acuan_y;
         titik_acuan_x = xend / 2.0;
@@ -74,6 +84,8 @@ class Runner : public Master
         vector<MoveableObject> planes, rplanes;
         vector<MoveableObject> debris;
         vector<MoveableObject> bullets;
+        vector<pair<MoveableObject, int> > explosion;
+        vector<MoveableObject> missile;
         MoveableObject cannon = meriam;
         planes.push_back(MoveableObject(-1, 0, 1, pesawat));
 
@@ -97,6 +109,15 @@ class Runner : public Master
                 drawObject(movableObject);
                 drawSolidObject(movableObject);
             }
+            for (pair<MoveableObject, int> &movableObject : explosion){
+                drawObject(movableObject.first);
+                drawSolidObject(movableObject.first);
+                movableObject.second--;
+            }
+            for (MoveableObject &movableObject : missile){
+                drawObject(movableObject);
+                drawSolidObject(movableObject);
+            }
 
             drawObject(cannon);
             drawSolidObject(cannon);
@@ -104,48 +125,48 @@ class Runner : public Master
             // move and rotate :/
             if (deg != 0){
                 if (deg > 0){
-                    if (sudut_meriam <= 40){
-                        sudut_meriam += 10;
+                    if (sudut_meriam <= maxdegree){
+                        sudut_meriam += degreechange;
                         cannon = MoveableObject(meriam);
                         cannon.selfRotation(titik_acuan_x, titik_acuan_y,
                                             sudut_meriam);
-                        deg -= 10;
+                        deg -= degreechange;
                     }
                     else{
                         deg = 0;
                     }
                 }
                 else{
-                    if (sudut_meriam >= -40){
-                        sudut_meriam -= 10;
+                    if (sudut_meriam >= mindegree){
+                        sudut_meriam -= degreechange;
                         cannon = MoveableObject(meriam);
                         cannon.selfRotation(titik_acuan_x, titik_acuan_y,
                                             sudut_meriam);
-                        deg += 10;
+                        deg += degreechange;
                     }
                     else{
                         deg = 0;
                     }
                 }
             }
+            explosion.erase(remove_if(explosion.begin(), explosion.end(), [](const pair<MoveableObject, int> &a){
+                return a.second <= 0;
+            }), explosion.end());
+
             vector<char> checkr(rplanes.size(), 1);
             vector<char> checkp(planes.size(), 1);
             vector<char> checkd(debris.size(), 1);
+            vector<char> checkm(missile.size(), 1);
             vector<MoveableObject> tmpr; // rplane
             vector<MoveableObject> tmpp; // plane
             vector<MoveableObject> tmpb; // bullet
             vector<MoveableObject> tmpd; // debris
+            vector<MoveableObject> tmpm; // missile
             for (int j = 0; j < planes.size(); ++j){
                 planes[j].move();
-                // if (planes[j].outOfWindow(yend, xend)){
-                //     checkp[j] = 0;
-                // }
             }
             for (int j = 0; j < rplanes.size(); ++j){
                 rplanes[j].move();
-                // if (rplanes[j].outOfWindow(yend, xend)){
-                //     checkr[j] = 0;
-                // }
             }
             for (int j = 0; j < debris.size(); ++j){
                 debris[j].move();
@@ -156,6 +177,15 @@ class Runner : public Master
             for (int j = 0; j < bullets.size(); ++j){
                 bullets[j].move();
             }
+            for(int j = 0;j<missile.size();++j){
+                missile[j].move();
+                if(missile[j].outOfWindow(yend, xend)){
+                    checkm[j] = 0;
+                    if(missile[j].getRefPos().getY() >= yend){
+                        live --;
+                    }
+                }
+            }
 
             // very slow shit
             for (const MoveableObject &objb : bullets){
@@ -164,11 +194,16 @@ class Runner : public Master
                     if (overlap(planes[j], objb)){
                         // isi pecahan
                         // if (checkp[j]){
-                            MoveableObject sp = puing1;
+                            MoveableObject sp = ledakan;
+                            sp.setPos(Pixel(planes[j].getRefPos().getX() + 100,
+                                            planes[j].getRefPos().getY()));
+                            explosion.push_back({sp, explosiontime});
+                            sp = puing1;
                             sp.setPos(planes[j].getRefPos());
                             sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
                                              sin(60 * PI / 180),
                                          cos(60 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             sp = puing2;
                             sp.setPos(Pixel(planes[j].getRefPos().getX() + 100,
@@ -176,6 +211,7 @@ class Runner : public Master
                             sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
                                              sin(45 * PI / 180),
                                          cos(45 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             sp = puing3;
                             sp.setPos(Pixel(planes[j].getRefPos().getX() + 300,
@@ -183,6 +219,7 @@ class Runner : public Master
                             sp.setVector((planes[j].getDx() < 0 ? -1 : 1) *
                                              sin(30 * PI / 180),
                                          cos(30 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             checkp[j] = 0;
                         // }
@@ -193,12 +230,17 @@ class Runner : public Master
                     if (overlap(rplanes[j], objb)){
                         // isi pecahan
                         // if (checkp[j]){
-                            MoveableObject sp = revpuing1;
+                            MoveableObject sp = ledakan;
+                            sp.setPos(Pixel(rplanes[j].getRefPos().getX() + 100,
+                                            rplanes[j].getRefPos().getY()));
+                            explosion.push_back({sp, explosiontime});
+                            sp = revpuing1;
                             sp.setPos(Pixel(rplanes[j].getRefPos().getX() + 150,
                                             rplanes[j].getRefPos().getY()));
                             sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
                                              sin(60 * PI / 180),
                                          cos(60 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             sp = revpuing2;
                             sp.setPos(Pixel(rplanes[j].getRefPos().getX() + 100,
@@ -206,6 +248,7 @@ class Runner : public Master
                             sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
                                              sin(45 * PI / 180),
                                          cos(45 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             sp = revpuing3;
                             sp.setPos(Pixel(rplanes[j].getRefPos().getX(),
@@ -213,6 +256,7 @@ class Runner : public Master
                             sp.setVector((rplanes[j].getDx() < 0 ? -1 : 1) *
                                              sin(30 * PI / 180),
                                          cos(30 * PI / 180));
+                            sp.setSpeed(2);
                             tmpd.push_back(sp);
                             checkr[j] = 0;
                         // }
@@ -220,9 +264,14 @@ class Runner : public Master
                     }
                 }
                 for (int j = 0; j < debris.size(); ++j){
-                    debris[j].move();
                     if (overlap(debris[j], objb)){
                         checkd[j] = 0;
+                        bisa = false;
+                    }
+                }
+                for(int j=0;j<missile.size();++j){
+                    if(overlap(missile[j], objb)){
+                        checkm[j] = 0;
                         bisa = false;
                     }
                 }
@@ -258,11 +307,19 @@ class Runner : public Master
                 if (checkd[j])
                     tmpd.push_back(debris[j]);
             }
+            for(int j=0;j<missile.size();++j){
+                if(checkm[j]){
+                    tmpm.push_back(missile[j]);
+                }
+            }
             rplanes = tmpr;
             planes = tmpp;
             bullets = tmpb;
             debris = tmpd;
+            missile = tmpm;
+            
 
+            /* Spawn Section */
             if (shoot > 0){
                 MoveableObject tmp = MoveableObject(peluru);
                 tmp.setSpeed(2);
@@ -275,8 +332,22 @@ class Runner : public Master
             if (i == 0){
                 planes.push_back(MoveableObject(-1, 0, 1, pesawat));
             }
+            for(const MoveableObject &obj : planes){
+                if(rand() % selectedtime == 0){
+                    MoveableObject tmp = MoveableObject(0, 1, 1, misil);
+                    tmp.setPos(obj.getRefPos().getX() + 200, obj.getRefPos().getY() + 80);
+                    missile.push_back(tmp);
+                }
+            }
+            for(const MoveableObject &obj : rplanes){
+                if(rand() % selectedtime == 0){
+                    MoveableObject tmp = MoveableObject(0, 1, 1, misil);
+                    tmp.setPos(obj.getRefPos().getX() + 250, obj.getRefPos().getY() + 80);
+                    missile.push_back(tmp);
+                }
+            }
 
-            if(planes.size() + rplanes.size() >= 8){ // stop game
+            if(live <= 0){
                 break;
             }
 
@@ -305,6 +376,8 @@ class Runner : public Master
 };
 
 int main(){
+    srand(time(NULL));
+
     /* non-newline input */
     struct termios org_opts, new_opts;
     int res = 0;
@@ -326,6 +399,7 @@ int main(){
     run.start();
     keepreading = false;
 
+    puts("why not close");
     /* close */
     pthread_exit(NULL);
     res = tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);

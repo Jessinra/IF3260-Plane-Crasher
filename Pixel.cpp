@@ -85,5 +85,5 @@ Pixel Pixel::dilated(float pointX, float pointY, float k)
     int resultX = k * (x - pointX) + pointX;
     int resultY = k * (y - pointY) + pointY;
 
-    return Pixel(resultX, resultY);
+    return Pixel(resultX, resultY, col);
 }
