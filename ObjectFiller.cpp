@@ -172,8 +172,8 @@ vector<Line> ObjectFiller::getObjectFillerLines(const Object &object)
         //3. Fill lines on scan line y by using pairs of x-coords from ActiveEdgeTuple
         FillFlag = 0;
         coordCount = 0;
-        x1 = 0;
-        x2 = 0;
+        x1 = -1;
+        x2 = -1;
         yMax1 = 0;
         yMax2 = 0;
 
