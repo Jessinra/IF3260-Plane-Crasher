@@ -82,8 +82,8 @@ Pixel Pixel::rotation(float pointX, float pointY, float theta)
 
 Pixel Pixel::dilated(float pointX, float pointY, float k)
 {
-    int resultX = k * (x - pointX) + pointX;
-    int resultY = k * (y - pointY) + pointY;
+    int resultX = k * (this->x - pointX) + pointX;
+    int resultY = k * (this->y - pointY) + pointY;
 
     return Pixel(resultX, resultY);
 }

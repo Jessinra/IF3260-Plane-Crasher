@@ -111,11 +111,17 @@ void MoveableObject::selfRotation(float x, float y, float theta)
 
 void MoveableObject::selfDilated(float x, float y, float k)
 {
+    x -= this->position.getX();
+    y -= this->position.getY();
+
     for (Line &line : lines)
     {
         line.setStartPixel(line.getStartPixel().dilated(x, y, k));
         line.setEndPixel(line.getEndPixel().dilated(x, y, k));
     }
+
+    x += this->position.getX();
+    y += this->position.getY();
 }
 
 float MoveableObject::getDx() const

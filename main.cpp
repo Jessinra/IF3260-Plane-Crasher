@@ -162,6 +162,9 @@ class Runner : public Master
                 }
             }
             for(int j = 0; j < explosions.size(); ++j) {
+                int middleX_explosion = explosions[j].getRefPos().getX() + explosions[j].getWidth()/2;
+                int middleY_explosion = explosions[j].getRefPos().getY() + explosions[j].getHeight()/2;
+                explosions[j].selfDilated(middleX_explosion, middleY_explosion, 1);
                 if (explosions[j].outOfWindow(yend, xend)) {
                     checke[j] = 0;
                 }
@@ -278,7 +281,7 @@ class Runner : public Master
                     tmpd.push_back(debris[j]);
             }
             for (int j = 0; j < explosions.size(); ++j) {
-                if (checke[j])
+                if (checke[j]) 
                     tmpe.push_back(explosions[j]);
             }
             rplanes = tmpr;
