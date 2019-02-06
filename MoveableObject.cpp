@@ -1,5 +1,6 @@
 
 #include "MoveableObject.hpp"
+using namespace std;
 
 MoveableObject::MoveableObject(float x, float y, const std::string &filename) : Object(x, y, filename)
 {
@@ -111,11 +112,44 @@ void MoveableObject::selfRotation(float x, float y, float theta)
 
 void MoveableObject::selfDilated(float x, float y, float k)
 {
+    float yMin, yMax, xMin, xMax;
+    bool alreadyloop = false;
+
     for (Line &line : lines)
     {
         line.setStartPixel(line.getStartPixel().dilated(x, y, k));
         line.setEndPixel(line.getEndPixel().dilated(x, y, k));
+
+        if (alreadyloop)
+        {
+            xMin = min(xMin, min(line.getStartPixel().getX(), line.getEndPixel().getX()));
+            xMax = max(xMax, max(line.getStartPixel().getX(), line.getEndPixel().getX()));
+            yMin = min(yMin, min(line.getStartPixel().getY(), line.getEndPixel().getY()));
+            yMax = max(yMax, max(line.getStartPixel().getY(), line.getEndPixel().getY()));
+        }
+        else
+        {
+            xMin = min(line.getStartPixel().getX(), line.getEndPixel().getX());
+            xMax = max(line.getStartPixel().getX(), line.getEndPixel().getX());
+            yMin = min(line.getStartPixel().getY(), line.getEndPixel().getY());
+            yMax = max(line.getStartPixel().getY(), line.getEndPixel().getY());
+        }
+        alreadyloop = true;
     }
+
+    for (Line &line : lines)
+    {
+        line.setStartPixel(Pixel(line.getStartPixel().getX() - xMin, line.getStartPixel().getY() - yMin, line.getStartPixel().getColor()));
+        line.setEndPixel(Pixel(line.getEndPixel().getX() - xMin, line.getEndPixel().getY() - yMin, line.getEndPixel().getColor()));
+    }
+
+    xMax -= xMin;
+    yMax -= yMin;
+
+    this->position.setPos(this->position.getX() + xMin, this->position.getY() + yMin);
+
+    width = xMax + 1;
+    height = yMax + 1;
 }
 
 float MoveableObject::getDx() const

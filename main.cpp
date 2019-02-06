@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define explosiontime 10
+#define explosiontime 20
 #define selectedtime 300
 #define degreechange 5
 #define maxdegree 50
@@ -110,6 +110,9 @@ class Runner : public Master
                 drawSolidObject(movableObject);
             }
             for (pair<MoveableObject, int> &movableObject : explosion){
+                float middleX_explosion = movableObject.first.getWidth()/2;
+                float middleY_explosion = movableObject.first.getHeight()/2;
+                movableObject.first.selfDilated(middleX_explosion, middleY_explosion, 1.05);
                 drawObject(movableObject.first);
                 drawSolidObject(movableObject.first);
                 movableObject.second--;
